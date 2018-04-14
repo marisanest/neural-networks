@@ -1,0 +1,6 @@
+tqdm
+numpy
+os
+pickle
+matplotlib
+random

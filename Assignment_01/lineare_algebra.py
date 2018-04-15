@@ -1,4 +1,7 @@
 """ Some functions for basic linear algebra opertations based on python lists. """
+import numpy as np
+from operator import sub, mul
+import random
 
 
 def vector_add(a, b):
@@ -6,7 +9,7 @@ def vector_add(a, b):
   # TODO (0,5):                                                       #
   # vector a + vector b as defined in the notebook                    #
   #####################################################################
-  return None
+  return list(map(sum, zip(a, b)))
   #####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################
@@ -17,7 +20,7 @@ def vector_sub(a, b):
   # TODO (0,5):                                                       #
   # vector a - vector b as defined in the notebook                    #
   #####################################################################
-  return None
+  return list(map(sub, a, b))
   #####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################
@@ -28,7 +31,7 @@ def vector_scalar_mul(r, a):
   # TODO (0,5):                                                         #
   # scalar r * vector a as defined in the notebook									  #
   #####################################################################
-  return None
+  return list(map(lambda x: x * r, a))
     #####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################
@@ -39,7 +42,7 @@ def vector_dot(a, b):
   # TODO (1):                                                         #
   # vec a * vec b (inner product) as defined in the notebook  			  #
   #####################################################################
-  return None
+  return sum(map(mul, a, b))
 	#####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################
@@ -49,7 +52,7 @@ def create_random_matrix(n, m):
   # TODO (1):                                                         #
   # creates a NxM matrix with random numbers between 0 and 255   		  #
   #####################################################################
-  return None
+  return [[random.randint(0, 256) for _ in range(m)] for _ in range(n)]
 	#####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################
@@ -59,7 +62,7 @@ def matrix_vector_mul(mat, vec):
   # TODO (1):                                                         #
   # matrix A * vector a (inner product)	as defined in the notebook	  #
   #####################################################################
-  return None
+  return [vector_dot(row, vec) for row in mat]
   #####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################
@@ -69,7 +72,7 @@ def matrix_transpose(a):
   # TODO (1):                                                         #
   # transpose a matrix A as defined in the notebook	  								#
   #####################################################################
-  return None
+  return list(map(list, zip(*a)))
   #####################################################################
   #                       END OF YOUR CODE                            #
   #####################################################################

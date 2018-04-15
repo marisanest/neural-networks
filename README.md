@@ -15,3 +15,4 @@ Repository for the lecture 'Ausgewählte Kapitel sozialer Webtechnologien'. For 
 * pickle
 * matplotlib
 * random
+* operator

@@ -71,7 +71,7 @@ class KNearestNeighbor(object):
         #####################################################################
         for i in tqdm(range(num_test), ascii=False, desc="euclidean distance calculation"):
             for j in range(num_train):
-                dists[i, j] = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])));
+                dists[i, j] = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])))
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -105,7 +105,7 @@ class KNearestNeighbor(object):
         # Hint: Try to formulate the Euclidean distance using matrix            #
         #       multiplication and two broadcast sums.                          #
         #########################################################################
-
+        dists = np.sqrt(np.sum(X**2, axis=1)[:, np.newaxis] + np.sum(self.X_train**2, axis=1) - 2 * np.dot(X, self.X_train.T))
         #########################################################################
         #                         END OF YOUR CODE                              #
         #########################################################################
@@ -150,3 +150,33 @@ class KNearestNeighbor(object):
             #                           END OF YOUR CODE                            #
             #########################################################################
         return y_pred
+
+    @classmethod
+    def cross_validate(cls, num_folds, X_train_folds, y_train_folds):
+
+        accuracies = []
+
+        for i in tqdm(range(num_folds)):
+            X_train = cls.flat_list(X_train_folds[:i] + X_train_folds[i+1:])
+            y_train = cls.flat_list(y_train_folds[:i] + y_train_folds[i+1:])
+            X_test = X_train_folds[i]
+            y_test = y_train_folds[i]
+
+            accuracy = cls.validate(X_train, y_train, X_test, y_test)
+            accuracies.append(accuracy)
+
+        return accuracies
+
+    @classmethod
+    def validate(cls, X_train, y_train, X_test, y_test):
+        classifier = cls()  # KNearestNeighbor()
+        classifier.train(X_train, y_train)
+        dists = classifier.compute_distances_vectorized(X_test)
+        y_test_pred = classifier.predict_labels(dists)
+        num_correct = np.sum(y_test_pred == y_test)
+        accuracy = float(num_correct) / len(X_test)
+        return accuracy
+
+    @staticmethod
+    def flat_list(multi_list):
+        return np.array([instance for sublist in multi_list for instance in sublist])

@@ -1,0 +1,250 @@
+\documentclass[12pt]{article}
+    \usepackage{amsmath}
+    \usepackage[utf8]{inputenc}
+    \usepackage{tikz}
+    \usepackage{xcolor}
+    \setlength{\parindent}{4em}
+    \setlength{\parskip}{1em}
+    \title{1163050 {\"U}bung 2
+        \author{Marisa Nest 
+        \and Marcus Kopp 551795}
+    }
+\begin{document}
+{\raggedright
+2.a) a = 2, b = e, c = 3\par
+\begin{tikzpicture}
+    [scale=.8,auto=left]
+    \node (A) at (3,10) {a};
+    \node (B) at (1,7)  {b};
+    \node (C) at (5,11)  {c};
+    \node (D) at (3,7) {ln};
+    \node (E) at (5,8)  {+};
+    \node (F) at (7,9)  {$\times$};
+    \node (G) at (8,7) {\( \frac{1}{3} \)};
+    \node (H) at (9,9) {$\times$};
+    \node (I) at (11,9) {\( \frac{1}{x} \)};
+    \node (OUT) at (13,9) {out};
+    
+    \draw[->] (A) edge node[above, text=green] {2} node[below, text=purple] {\( \frac{-1}{9} \)} (E);
+    \draw[->] (B) edge node[above, text=green] {e} node[below, text=purple] {$-9$} (D);
+    \draw[->] (D) edge node[above, text=green] {1} node[below, text=purple] {\( \frac{-1}{9} \)} (E);
+    \draw[->] (E) edge node[above, text=green] {3} node[below, text=purple] {\( \frac{-1}{9} \)} (F);
+    \draw[->] (C) edge node[above, text=green] {3} node[below, text=purple] {\( \frac{-1}{9} \)} (F);
+    \draw[->] (F) edge node[above, text=green] {9} node[below, text=purple] {\( \frac{-1}{27} \)} (H);
+    \draw[->] (G) edge (H);
+    \draw[->] (H) edge node[above, text=green] {3} node[below, text=purple] {\( \frac{-1}{9} \)} (I);
+    \draw[->] (I) edge node[above, text=green] {\( \frac{1}{3} \)} node[below, text=purple] {1} (OUT);
+  
+\end{tikzpicture}\par
+  out = \textcolor{green}{\( \frac{1}{3} \)},
+  \( \frac{dout}{da} \) = \textcolor{purple}{\( \frac{-1}{9} \)},
+  \( \frac{dout}{db} \) = \textcolor{purple}{$-9$},
+  \( \frac{dout}{dc} \) = \textcolor{purple}{\( \frac{-1}{9} \)}\par
+  2.b) a = 2, b = e, c = 3\par
+\begin{tikzpicture}
+    [scale=.8,auto=left]
+    \node (A) at (1,10) {a};
+    \node (B) at (1,7)  {b};
+    \node (C) at (1,4)  {c};
+    \node (D) at (4,9) {ln};
+    \node (E) at (4,5)  {+};
+    \node (F) at (7,9)  {\( \frac{1}{x} \)};
+    \node (G) at (7,5) {\( \frac{1}{3} \)};
+    \node (H) at (10,7) {$\times$};
+    \node (OUT) at (13,7) {out};
+    
+    \draw[->] (A) edge node[above, text=green] {} node[below, text=purple] {} (D);
+    \draw[->] (B) edge node[above, text=green] {} node[below, text=purple] {} (D);
+    \draw[->] (B) edge node[above, text=green] {} node[below, text=purple] {} (E);
+    \draw[->] (C) edge node[above, text=green] {} node[below, text=purple] {} (E);
+    \draw[->] (D) edge node[above, text=green] {} node[below, text=purple] {} (F);
+    \draw[->] (D) edge node[above, text=green] {} node[below, text=purple] {} (G);
+    \draw[->] (E) edge node[above, text=green] {} node[below, text=purple] {} (G);
+    \draw[->] (F) edge node[above, text=green] {} node[below, text=purple] {} (H);
+    \draw[->] (G) edge node[above, text=green] {} node[below, text=purple] {} (H);
+    \draw[->] (H) edge node[above, text=green] {} node[below, text=purple] {} (OUT);
+    
+\end{tikzpicture}\par
+out = ?, \( \frac{dout}{da} \) = ?, \( \frac{dout}{db} \) = ?, \( \frac{dout}{dc} \) = ?\par
+  \pagebreak
+  2.b) Musterl{\"o}sung\par
+  \begin{tikzpicture}
+    [scale=.8,auto=left]
+    \node (A) at (1,10) {a};
+    \node (B) at (1,7)  {b};
+    \node (C) at (1,4)  {c};
+    \node (D) at (4,9) {ln};
+    \node (E) at (4,5)  {+};
+    \node (F) at (7,9)  {\( \frac{1}{x} \)};
+    \node (G) at (7,5) {\( \frac{1}{3} \)};
+    \node (H) at (10,7) {$\times$};
+    \node (OUT) at (13,7) {out};
+    \node (in_A) at (0,10) [text=green] {3};
+    \node (in_B) at (0,7) [text=green] {2};
+    \node (in_C) at (0,4) [text=green] {1};
+    \node (sol_A) at (0,9) [text=purple] {1\( \frac{17}{18} \)};
+    \node (sol_B) at (0,6) [text=purple] {3\( \frac{11}{12} \)};
+    \node (sol_C) at (0,3) [text=purple] {1};
+
+    
+    \draw[->] (A) edge node[above, text=green] {3} node[below, text=purple] {1\( \frac{17}{18} \)} (D);
+    \draw[->] (B) edge node[above, text=green] {2} node[below, text=purple] {2\( \frac{11}{12} \)} (D);
+    \draw[->] (B) edge node[above, text=green] {2} node[below, text=purple] {1} (E);
+    \draw[->] (C) edge node[above, text=green] {1} node[below, text=purple] {1} (E);
+    \draw[->] (D) edge node[above, text=green] {6} node[below, text=purple] {\( \frac{-1}{36} \)} (F);
+    \draw[->] (D) edge node[above, text=green] {6} node[below, text=purple] {1} (G);
+    \draw[->] (E) edge node[above, text=green] {3} node[below, text=purple] {1} (G);
+    \draw[->] (F) edge node[above, text=green] {\( \frac{1}{6} \)} node[below, text=purple] {1} (H);
+    \draw[->] (G) edge node[above, text=green] {9} node[below, text=purple] {1} (H);
+    \draw[->] (H) edge node[above, text=green] {9\( \frac{1}{6} \)} node[below, text=purple] {1} (OUT);
+  
+  \end{tikzpicture}\par
+  out = \textcolor{green}{9\( \frac{1}{6} \)},
+  \( \frac{dout}{da} \) = \textcolor{purple}{1\( \frac{17}{18} \)},
+  \( \frac{dout}{db} \) = \textcolor{purple}{3\( \frac{11}{12} \)},
+  \( \frac{dout}{dc} \) = \textcolor{purple}{1}\par
+  \tikzset{neuron/.style={draw,ultra thick, circle, minimum size=1cm}}
+  3.a) (Farben nur zur {\"U}bersichtlichkeit)\par
+  \begin{tikzpicture}
+    [scale=.8,auto=left]
+    \node (A) [neuron,color = blue] [neuron] at (1,10) {$in_1$};
+    \node (B) [neuron,color = green] at (1,7)  {$in_2$};
+    \node (C) [neuron, color = orange] at (1,4)  {$in_3$};
+    \node (bias_D) [neuron, color=red] at (4,10) {$b_E$};
+    \node (D) [neuron] at (4,8) {$h_1$};
+    \node (E) [neuron] at (4,6)  {$h_2$};
+    \node (bias_E) [neuron, color=red] at (4,4) {$b_D$};
+    \node (bias_OUT) [neuron, color=red] at (7,9) {$b_{OUT}$};
+    \node (OUT) [neuron, color=teal] at (7,7) {out};
+
+    \draw[->] (A) edge[color=blue] node[above, text=blue] {-20} (D);
+    \draw[->] (A) edge[color=blue] node[above, text=blue] {-40} (E);
+    \draw[->] (B) edge[color=green] node[above, text=green] {20} (D);
+    \draw[->] (B) edge[color=green] node[above, text=green] {0} (E);
+    \draw[->] (C) edge[color=orange] node[above, text=orange] {-40} (D);
+    \draw[->] (C) edge[color=orange] node[above, text=orange] {0} (E);
+    \draw[->] (bias_D) edge[color=red] node[right, text=red] {10} (D);
+    \draw[->] (D) edge[color=teal] node[above, text=teal] {40} (OUT);
+    \draw[->] (E) edge[color=teal] node[above, text=teal] {-40} (OUT);
+    \draw[->] (bias_E) edge[color=red] node[right, text=red] {20} (E);
+    \draw[->] (bias_OUT) edge[color=red] node[right, text=red] {20} (OUT);
+  \end{tikzpicture}\par
+  \pagebreak
+  3.b)\par
+  $$
+  x_1 = [0,1,1],x_2 = [1,1,0],x_3 = [1,0,1], bias_{hidden} = [10, 20], bias_{out} = 20, 
+  g(z) =
+    \begin{cases}
+      0   & \quad z \leq -10\\
+      1   & \quad z \geq 10 \\
+      0.5 & \quad \text{sonst}
+  \end{cases}
+  $$\par
+  $$
+  Input =
+  \begin{pmatrix}
+    0 & 1 & 1 \\
+    1 & 1 & 0 \\
+    1 & 0 & 1
+  \end{pmatrix},
+  Hidden = 
+  \begin{pmatrix}
+    -20 & 20 & -40 \\
+    -40 & 0 & 0 
+  \end{pmatrix},
+  Hidden^T = 
+  \begin{pmatrix}
+    -20 & -40 \\
+     20 & 0 \\
+    -40 & 0
+  \end{pmatrix}
+  $$\par
+  $$
+  Input \times Hidden^T +  =
+  \begin{pmatrix}
+    0 & 1 & 1 \\
+    1 & 1 & 0 \\
+    1 & 0 & 1
+  \end{pmatrix}
+  \times
+  \begin{pmatrix}
+    -20 & -40 \\
+     20 & 0 \\
+    -40 & 0
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    -20 & 0 \\
+     0 & -40 \\
+    -60 & -40
+  \end{pmatrix}
+  $$\par
+  $$
+  \begin{pmatrix}
+    -20 & 0 \\
+     0 & -40 \\
+    -60 & -40
+  \end{pmatrix}
+  + bias_{hidden} =
+  \begin{pmatrix}
+    -20 + 10 & 0 + 20 \\
+    0 + 10 & -40 + 20 \\
+    -60 + 10 & -40 + 20
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    -10 & 20 \\
+     0 & -20 \\
+    -60 & -20
+  \end{pmatrix}
+  $$\par
+  $$
+  g(
+    \begin{pmatrix}
+      -10 & 20 \\
+       0 & -20 \\
+      -60 & -20
+    \end{pmatrix}
+  ) \times bias_{out} =
+  \begin{pmatrix}
+    0 & 1 \\
+    1 & 0 \\
+    0 & 0
+  \end{pmatrix}
+  \times
+  \begin{pmatrix}
+    40 \\
+    -40
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    -40 \\
+    40 \\
+    0
+  \end{pmatrix}
+  $$\par
+  $$
+  g(
+    \begin{pmatrix}
+      -40 \\
+      40 \\
+      0
+    \end{pmatrix}
+    + 20
+  ) =
+  g(
+    \begin{pmatrix}
+      -20 \\
+      60 \\
+      20
+    \end{pmatrix}
+  ) =
+  \underline{\begin{pmatrix}
+    0 \\
+    1 \\
+    1
+  \end{pmatrix}}
+  $$\par
+ 
+}
+\end{document}

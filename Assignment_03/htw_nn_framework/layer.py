@@ -56,10 +56,39 @@ class Conv():
     ''' Description
     '''
     def __init__(self, X_dim, filter_num, filter_dim, stride, padding):
-        None
+        self.X_dim = X_dim
+        self.filter_num = filter_num
+        self.filter_dim = filter_dim
+        self.stride = stride
+        self.padding = padding
+        self.W = # TODO: init
+        self.b = # TODO: init
+        self.params = [self.W, self.b]
+        self.output_dim = self.output_dimension() # The dimensions of the Conv output.
 
     def forward(self, X):
-        return None
+        """
+        """
+        # Initialize the output volume with zeros.
+        output = np.zeros(self.output_dim)
+        
+        # Calculate image with padding and new image dimension.
+        image, self.image_dim = self.zero_padding(image)
+        
+        for x_i, x in tqdm(enumerate(X)):  # loop over image samples.
+            for h in range(self.output_dim[1]):  # loop over height indices of the output volume.
+                for w in range(self.output_dim[2]):  # loop over width indices of the output volume.
+                
+                    # Indices if the current image part that sould be used for computation.
+                    x_H_i_start = h * self.stride
+                    x_H_i_end = image_H_i_start + self.filter_dim
+                    x_W_i_start = w * self.stride
+                    x_W_i_end = image_W_i_start + self.filter_dim
+                
+                    for f_i, f in enumerate(self.W):
+                        output[x_i,h,w,f_i] = np.sum(x[x_H_i_start:x_H_i_end,x_W_i_start:x_W_i_end] * f)
+                    
+        return output
 
     def backward(self, dout):
         return None
@@ -69,10 +98,33 @@ class Pool():
     ''' Description
     '''
     def __init__(self, X_dim, func, filter_dim, stride):
-        None
-
+        self.X_dim = X_dim
+        self.func = func
+        self.filter_dim = filter_dim
+        self.stride = stride
+        self.W = # TODO: init
+        self.b = # TODO: init
+        self.params = [self.W, self.b]
+        self.output_dim = self.output_dimension() # The dimensions of the Conv output.
+        
     def forward(self, X):
-        return None
+        # Initialize the output volume with zeros.
+        output = np.zeros(self.output_dim)
+        
+        for x_i, x in tqdm(enumerate(X)):  # loop over image samples.
+            for h in range(self.output_dim[1]):  # loop over height indices of the output volume.
+                for w in range(self.output_dim[2]):  # loop over width indices of the output volume.
+                
+                    # Indices if the current image part that sould be used for computation.
+                    x_H_i_start = h * self.stride
+                    x_H_i_end = image_H_i_start + self.filter_dim
+                    x_W_i_start = w * self.stride
+                    x_W_i_end = image_W_i_start + self.filter_dim
+                    
+                    for f_i, f in enumerate(self.W):
+                        output[x_i,h,w,f_i] = self.pooling_function(x[x_H_i_start:x_H_i_end,x_W_i_start:x_W_i_end,:])
+                    
+        return output
 
     def backward(self, dout):
         return None

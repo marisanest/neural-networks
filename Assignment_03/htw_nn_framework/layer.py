@@ -301,12 +301,27 @@ class Dropout():
     ''' Description
     '''
     def __init__(self, prob=0.5):
-        None
+        '''
+        '''
+        self.prob = prob
+        self.params = []
 
     def forward(self, X):
-        return None
+        self.X = X
+        self.mask = np.random.rand(X.shape[1]) < self.prob
+        
+        output = X.copy()
+        
+        for i in range(self.X.shape[0]):
+            output[i] *= self.mask
+        
+        return output
 
     def backward(self, dout):
-        return None
-
+        dX = dout.copy()
+        
+        for i in range(self.X.shape[0]):
+            dX[i] *= self.mask
+        
+        return dX, []
 

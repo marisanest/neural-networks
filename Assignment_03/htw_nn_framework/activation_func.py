@@ -49,10 +49,12 @@ class sigmoid():
         self.params = []
 
     def forward(self, X):
-        return None
+        self.X = X
+        return 1. / (1 + np.exp(-self.X))
 
     def backward(self, dout):
-        return None
+        dX = (1. / (1 + np.exp(-dout))) * (1 - (1. / (1 + np.exp(-dout))))
+        return dX, []
 
 class tanh():
     ''' Description
@@ -61,8 +63,10 @@ class tanh():
         self.params = []
 
     def forward(self, X):
-        return None
+        self.X = X
+        return np.tanh(self.X)
 
     def backward(self, dout):
-        return None
+        dX = 1. / (np.cosh(dout) * np.cosh(dout)) # bzw. np.sech(self.X) * np.sech(self.X)
+        return dX, []
 

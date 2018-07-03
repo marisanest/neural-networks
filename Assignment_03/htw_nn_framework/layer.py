@@ -71,10 +71,10 @@ class Conv():
         """
         """
         self.X = X
-        self.X_dim = self.X.shape
+        self.X_dim = X.shape
         
         # The dimensions of X.
-        (n, in_C, in_H, in_W) = self.X_dim
+        n, in_C, in_H, in_W = self.X_dim
         
         # The dimensions of output.
         out_C = self.filter_num
@@ -82,31 +82,27 @@ class Conv():
         out_W = int((in_W - self.filter_dim + 2 * self.padding) / self.stride) + 1
         
         # Initialize output with the correct shapes and zeros.
-        output = np.zeros((n, out_C, out_H, out_W))
+        out = np.zeros((n, out_C, out_H, out_W))
         
         # Add zero padding to X.
-        padded_X = self.zero_padding(X)
+        padded_X = np.pad(X,((0,0),(0,0),(self.padding,self.padding),(self.padding,self.padding)),'constant',constant_values = 0)
         
-        for i in range(n):  # Loop over the batch of training samples.
-            
-            padded_x = padded_X[i] # Select ith training sample.
-          
-            for h in range(out_H):  # Loop over height indices of the output volume.
-                for w in range(out_W):  # Loop over width indices of the output volume.
+        for i in range(n):                               # Loop over the batch of training samples.
+            for c in range(out_C):                       # Loop over channel indices of the output volume.
+                for h in range(out_H):                   # Loop over height indices of the output volume.
+                    for w in range(out_W):               # Loop over width indices of the output volume.
+                        
+                        # Corner indices of the window.
+                        x_h_start = h * self.stride
+                        x_h_end = x_h_start + self.filter_dim
+                        x_w_start = w * self.stride
+                        x_w_end = x_w_start + self.filter_dim
                     
-                    # Corner indices of the current training sample part.
-                    x_h_start = h * self.stride
-                    x_h_end = x_h_start + self.filter_dim
-                    x_w_start = w * self.stride
-                    x_w_end = x_w_start + self.filter_dim
+                        # Select ith training sample and the current window.
+                        padded_x_slice = padded_X[i,:,x_h_start:x_h_end,x_w_start:x_w_end]
+                        out[i,c,h,w] = np.sum(padded_x_slice * self.W[c,:,:,:]) + self.b[c,:,:,:]
                     
-                    # Slice the current training sample part with respect to the corner indices.
-                    padded_x_slice = padded_x[:,x_h_start:x_h_end,x_w_start:x_w_end]
-                
-                    for c in range(out_C): # Loop over channel indices of the output volume.
-                        output[i,c,h,w] = np.sum(padded_x_slice * self.W[c,:,:,:] + self.b[c,:,:,:])
-                    
-        return output
+        return out
 
     def backward(self, dout):
         """Implement the backward propagation for a convolution layer.
@@ -120,61 +116,48 @@ class Conv():
         """
         
         # The dimensions of X.
-        (n, in_C, in_H, in_W) = self.X_dim
+        n, in_C, in_H, in_W = self.X_dim
         
         # The dimensions of dout.
-        (n, out_C, out_H, out_W) = dout.shape
+        n, out_C, out_H, out_W = dout.shape
           
-        # Initialize dX, dW, db with the correct shapes and zeros.
-        dX = np.zeros((n, in_C, in_H, in_W))                           
-        dW = np.zeros((out_C, in_C, self.filter_dim, self.filter_dim))
-        db = np.zeros((out_C, 1, 1, 1))
+        # Add zero padding to X.
+        padded_X =  np.pad(self.X,((0,0),(0,0),(self.padding,self.padding),(self.padding,self.padding)),'constant',constant_values = 0)
+        
+        # Initialize dX, padded_dX dW, db with the correct shapes and zeros.
+        dX = np.zeros(self.X.shape)
+        padded_dX = np.zeros(padded_X.shape)
+        dW = np.zeros(self.W.shape)
+        db = np.zeros(self.b.shape)
 
-        # Add zero padding to X and dX.
-        padded_X =  self.zero_padding(self.X)
-        padded_dX = self.zero_padding(dX)
-        
-        for i in range(n):                       # Loop over the batch of training samples.
-        
-            # Select ith training sample from padded_X and padded_dX.
-            padded_x = padded_X[i]
-            padded_dx = padded_dX[i]
-        
-            for h in range(out_H):                   # Loop over height indices of the output volume.
-                for w in range(out_W):               # Loop over width indices of the output volume.
+
+        # Calculate dX, dW and db
+        for i in range(n):                                # Loop over the batch of training samples.
+            for c in range(out_C):                        # Loop over the channels of the output volume.
+                for h in range(out_H):                    # Loop over height indices of the output volume.
+                    for w in range(out_W):                # Loop over width indices of the output volume.
                     
-                    # Corner indices of the current training sample part.
-                    x_h_start = h * self.stride
-                    x_h_end = x_h_start + self.filter_dim
-                    x_w_start = w * self.stride
-                    x_w_end = x_w_start + self.filter_dim
+                        # Corner indices of the window.
+                        x_h_start = h * self.stride
+                        x_h_end = x_h_start + self.filter_dim
+                        x_w_start = w * self.stride
+                        x_w_end = x_w_start + self.filter_dim
                     
-                    # Slice the current training sample part with respect to the corner indices.
-                    padded_x_slice = padded_x[:,x_h_start:x_h_end,x_w_start:x_w_end]
+                        # Select ith training sample and the current window.
+                        padded_x_slice = padded_X[i,:,x_h_start:x_h_end,x_w_start:x_w_end]
                         
-                    for c in range(out_C):           # Loop over the channels of the output volume.
                         # Update gradients.
-                        padded_dx[:,x_h_start:x_h_end,x_w_start:x_w_end] += self.W[c,:,:,:] * dout[i, c, h, w]
-                        dW[c,:,:,:] += padded_x_slice * dout[i, c, h, w]
-                        db[c,:,:,:] += dout[i, c, h, w]
-                    
-            # Set the ith training example's dX to the unpaded padded_dx
-            dX[i, :, :, :] = padded_dx[:,self.padding:-self.padding,self.padding:-self.padding]
-    
-        # Making sure output shape is correct
-        assert(dX.shape == (n, in_C, in_H, in_W))
+                        padded_dX[i,:,x_h_start:x_h_end,x_w_start:x_w_end] += dout[i, c, h, w] * self.W[c,:,:,:]
+                        
+                        dW[c,:,:,:] += dout[i, c, h, w] * padded_x_slice
+                
+                # Calculate db     
+                db[c] = np.sum(dout[:,c,:,:])
+       
+        # Delete padding 
+        dX = padded_dX[:,:,self.padding:-self.padding,self.padding:-self.padding]
     
         return dX, [dW, db]
-    
-    def zero_padding(self, X):
-        """ Add zero padding to all images in X.
-    
-        Args:
-            X (ndarray): Batch of images.
-        Returns:
-            Padded images.
-        """
-        return np.pad(X,((0,0),(0,0),(self.padding,self.padding),(self.padding,self.padding)),'constant',constant_values = 0)
 
 
 class Pool():
@@ -185,47 +168,41 @@ class Pool():
         self.func = func
         self.filter_dim = filter_dim
         self.stride = stride
-        #self.W = # TODO: init
-        #self.b = # TODO: init
-        self.params = [self.W, self.b]
-        self.output_dim = self.output_dimension() # The dimensions of the Conv output.
+        self.params = []
         
     def forward(self, X):
         """
         """
         self.X = X
-        self.X_dim = self.X.shape
+        self.X_dim = X.shape
         
         # The dimensions of X.
-        (n, in_H, in_W, in_C) = self.X_dim
+        n, in_C, in_H, in_W = self.X_dim
         
         # The dimensions of output.
-        out_H = int((in_H - self.filter_dim + 2 * self.padding) / self.stride) + 1
-        out_W = int((in_W - self.filter_dim + 2 * self.padding) / self.stride) + 1
-        out_C = self.filter_num
+        out_H = int((in_H - self.filter_dim) / self.stride) + 1
+        out_W = int((in_W - self.filter_dim) / self.stride) + 1
+        out_C = in_C
         
         # Initialize output with the correct shapes and zeros.
-        output = np.zeros((n, out_H, out_W, out_C))
+        out = np.zeros((n, out_C, out_H, out_W))
         
-        for i in range(n):  # Loop over the batch of training samples.
-            
-            x = X[i] # Select ith training sample.
-            
-            for h in range(out_H):  # Loop over height indices of the output volume.
-                for w in range(out_W):  # Loop over width indices of the output volume.
+        for i in range(n):                               # Loop over the batch of training samples.
+            for c in range(out_C):                       # Loop over channel indices of the output volume.
+                for h in range(out_H):                   # Loop over height indices of the output volume.
+                    for w in range(out_W):               # Loop over width indices of the output volume.
                 
-                    # Corner indices of the current training sample part.
-                    x_h_start = h * self.stride
-                    x_h_end = x_h_start + self.filter_dim
-                    x_w_start = w * self.stride
-                    x_w_end = x_w_start + self.filter_dim
+                        # Corner indices of the window.
+                        x_h_start = h * self.stride
+                        x_h_end = x_h_start + self.filter_dim
+                        x_w_start = w * self.stride
+                        x_w_end = x_w_start + self.filter_dim
                     
-                    # Slice the current training sample part with respect to the corner indices.
-                    x_slice = padded_x[x_h_start:x_h_end,x_w_start:x_w_end,:]
-
-                    for c in range(out_C): # Loop over channel indices of the output volume.
-                        output[i,h,w,c] = self.pooling_function(x_slice)
-        return output
+                        # Select ith training sample and the current window.
+                        x_slice = X[i,c,x_h_start:x_h_end,x_w_start:x_w_end]
+                        # Calculate output
+                        out[i,c,h,w] = self.func(x_slice)
+        return out
         
     def backward(self, dout):
         """Implement the backward propagation for a pooling layer.
@@ -235,53 +212,34 @@ class Pool():
         Returns:
             dX (ndarray): Gradient with respect to the input of the pool layer (X)
         """
-        # The dimensions of X.
-        (n, in_H, in_W, in_C) = self.X_dim
-        
         # The dimensions of dout.
-        (n, out_H, out_W, out_C) = dout.shape
+        n, C, out_H, out_W = dout.shape
           
         # Initialize dX with the correct shapes and zeros.
         dX = np.zeros(self.X_dim)
-    
-        for i in range(n):                       # Loop over the batch of training samples.
         
-            x = self.X[i] # Select ith training sample.
-        
-            for h in range(out_H):                   # Loop over height indices of the output volume.
-                for w in range(out_W):               # Loop over width indices of the output volume.
-                    
-                    # Corner indices of the current training sample part.
-                    x_h_start = h * self.stride
-                    x_h_end = x_h_start + self.filter_dim
-                    x_w_start = w * self.stride
-                    x_w_end = x_w_start + self.filter_dim
-                    
-                    for c in range(out_C):           # Loop over channel indices of the output volume.
-                        # Compute the backward propagation in both modes.
-                        if mode == "max":
-                        
-                            # Use the corners and "c" to define the current slice from a_prev (≈1 line)
-                            x_slice = a_prev[x_h_start:x_h_end,x_w_start:x_w_end,c]
-                            # Create the mask from a_prev_slice (≈1 line)
-                            mask = create_mask_from_window(a_prev_slice)
-                            # Set dA_prev to be dA_prev + (the mask multiplied by the correct entry of dA) (≈1 line)
-                            dX[i,x_h_start:x_h_end,x_w_start:x_w_end,c] += (mask * x_slice)
-                        
-                        elif mode == "average":
-                        
-                            # Get the value a from dA (≈1 line)
-                            dx = dX
-                            # Define the shape of the filter as fxf (≈1 line)
-                            shape = (self.filter_dim,self.filter_dim)
-                            # Distribute it to get the correct slice of dA_prev. i.e. Add the distributed value of da. (≈1 line)
-                            dX[i,x_h_start:x_h_end,x_w_start:x_w_end,c] += dx
-                        
-
-        # Making sure your output shape is correct
-        assert(dX.shape == self.X.shape)
+        #print(dout[0,0,0,0])
+        #print(X[0,0,0:3,0:3])
     
-        return dX
+        for i in range(n):                              # Loop over the batch of training samples.
+            for c in range(C):                          # Loop over channel indices of the output volume.
+                for h in range(out_H):                  # Loop over height indices of the output volume.
+                    for w in range(out_W):              # Loop over width indices of the output volume.
+                    
+                        # Corner indices of the window.
+                        x_h_start = h * self.stride
+                        x_h_end = x_h_start + self.filter_dim
+                        x_w_start = w * self.stride
+                        x_w_end = x_w_start + self.filter_dim
+                    
+                        # Select ith training sample and the current window.
+                        x_slice = self.X[i,c,x_h_start:x_h_end,x_w_start:x_w_end]
+                        # Calculate mask
+                        mask = (x_slice == np.max(x_slice)) 
+                        # What is when not only one pxel has the max value? 
+                        dX[i,c,x_h_start:x_h_end,x_w_start:x_w_end] = mask * dout[i,c,h,w]
+              
+        return dX, []
 
 
 class Batchnorm():
@@ -308,20 +266,17 @@ class Dropout():
 
     def forward(self, X):
         self.X = X
-        self.mask = np.random.rand(X.shape[1]) < self.prob
         
-        output = X.copy()
+        # Create mask 
+        self.mask = np.random.rand(*self.X.shape) < self.prob
         
-        for i in range(self.X.shape[0]):
-            output[i] *= self.mask
+        # Apply mask
+        out = X * self.mask
         
-        return output
+        return out
 
     def backward(self, dout):
-        dX = dout.copy()
-        
-        for i in range(self.X.shape[0]):
-            dX[i] *= self.mask
+        dX = dout * self.mask * self.prob
         
         return dX, []
 

@@ -10,7 +10,7 @@ from pathlib import Path
 class Cifar():
 
   def __init__(self):
-    self.root_folder = 'cifar-10-batches-py'
+    self.root_folder = 'htw_nn_framework/cifar-10-batches-py'
 
   def load_CIFAR_batch(self, filename):
     with open(filename, 'rb') as f:

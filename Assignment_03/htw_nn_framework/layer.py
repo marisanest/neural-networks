@@ -62,6 +62,7 @@ class Conv():
         self.filter_num = filter_num
         self.filter_dim = filter_dim
         self.stride = stride
+        // TODO: check why at first X_dim[2] and then X_dim[3] is used. Add exception for paddings with decimal value 
         self.padding = int(((X_dim[2] - 1) * stride - X_dim[3] + filter_dim) / 2) if padding else 0
         self.W = np.random.randn(filter_num, X_dim[1], filter_dim, filter_dim)
         self.b = np.zeros((filter_num, 1, 1, 1))

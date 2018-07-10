@@ -22,11 +22,11 @@ class NeuralNetwork:
             self.params.append(layer.params)
         self.score_func = score_func
 
-    def forward(self, X):
+    def forward(self, X, test=False):
         ''' Pass input X through all layers in the network
         '''
         for layer in self.layers:
-            X = layer.forward(X)
+            X = layer.forward(X, test=test)
         return X
 
     def backward(self, dout):
@@ -43,5 +43,5 @@ class NeuralNetwork:
         ''' Run a forward pass and use the score function to classify
             the output.
         '''
-        X = self.forward(X)
+        X = self.forward(X, test=True)
         return np.argmax(self.score_func(X), axis=1)

@@ -1,15 +1,18 @@
 import numpy as np
+from initializer import *
 
 class Flatten():
     ''' Flatten layer used to reshape inputs into vector representation
 
-    Layer should be used in the forward pass before a dense layer to
+    Layer should be used in the 
+    
+    pass before a dense layer to
     transform a given tensor into a vector.
     '''
     def __init__(self):
         self.params = []
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
         ''' Reshapes a n-dim representation into a vector
             by preserving the number of input rows.
 
@@ -21,56 +24,79 @@ class Flatten():
         out = X.reshape(-1).reshape(self.out_shape)
         return out
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
         ''' Restore dimensions before flattening operation
         '''
         out = dout.reshape(self.X_shape)
         return out, []
 
 class FullyConnected():
-    ''' Fully connected layer implemtenting linear function hypothesis
-        in the forward pass and its derivation in the backward pass.
-    '''
+    """Implement all functionality of a fully connected layer.
+    """
     def __init__(self, in_size, out_size):
         ''' Initilize all learning parameters in the layer
 
         Weights will be initilized with modified Xavier initialization.
         Biases will be initilized with zero.
         '''
-        self.W = np.random.randn(in_size, out_size) * np.sqrt(2. / in_size)
+        self.W = np.random.randn(in_size, out_size) * np.sqrt(2. / in_size) # Initializer.he_normal((in_size, out_size))
         self.b = np.zeros((1, out_size))
         self.params = [self.W, self.b]
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
+        '''Implement the forward pass for a fully connected layer.
+    
+        Args:
+            X (ndarray): Input of the fully connected layer.
+        Returns:
+            out (ndarray): Output of the fully connected layer.
+        '''
         self.X = X
         out = np.add(np.dot(self.X, self.W), self.b)
         return out
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
+        '''Implement the backward propagation for a fully connected layer.
+    
+        Args:
+            dout (ndarray): The gradients with respect to the output of the fully connected layer.
+        Returns:
+            dX (ndarray): The gradients with respect to the input of the fully connected layer (X).
+            dW (ndarray): The gradients with respect to the weights of the fully connected layer (W).
+            db (ndarray): The gradients with respect to the biases of the fully connected layer (b).
+        '''
         dX = np.dot(dout, self.W.T)
         dW = np.dot(self.X.T, dout)
         db = np.sum(dout, axis=0)
         return dX, [dW, db]
 
 class Conv():
-    '''         
-    Weights will be initilized with ... ?.
-    Biases will be initilized with zero.
+    '''Implement all functionality of a conv layer.
     '''
     def __init__(self, X_dim, filter_num, filter_dim, stride, padding):
         self.X_dim = X_dim
         self.filter_num = filter_num
         self.filter_dim = filter_dim
         self.stride = stride
-        # TODO: check why at first X_dim[2] and then X_dim[3] is used. Add exception for paddings with decimal value 
-        self.padding = int(((X_dim[2] - 1) * stride - X_dim[3] + filter_dim) / 2) if padding else 0
-        self.W = np.random.randn(filter_num, X_dim[1], filter_dim, filter_dim)
+        self.padding = ((X_dim[2] - 1) * stride - X_dim[2] + filter_dim) / 2 if padding else 0
+        if self.padding.is_integer():
+            self.padding = int(self.padding)
+        else:
+            raise TypeError('Calculated padding is not an integer. Please choose a different filter_dim and/or stride!')
+        
+        fan_in, fan_out = self.get_fans(X_dim)
+        self.W = Initializer.glorot_normal((filter_num, X_dim[1], filter_dim, filter_dim)) # np.random.randn(filter_num, X_dim[1], filter_dim, filter_dim) * np.sqrt(2. / in_size)
         self.b = np.zeros((filter_num, 1, 1, 1))
         self.params = [self.W, self.b]
 
-    def forward(self, X):
-        """
-        """
+    def forward(self, X, **kwargs):
+        '''Implement the forward pass for a conv layer.
+    
+        Args:
+            X (ndarray): Input of the conv layer.
+        Returns:
+            out (ndarray): Output of the conv layer.
+        '''
         self.X = X
         self.X_dim = X.shape
         
@@ -105,16 +131,16 @@ class Conv():
                     
         return out
 
-    def backward(self, dout):
-        """Implement the backward propagation for a convolution layer.
+    def backward(self, dout, **kwargs):
+        '''Implement the backward propagation for a convolution layer.
     
         Args:
-            dout (ndarray): Gradient with respect to the output of the conv layer
+            dout (ndarray): The gradients with respect to the output of the conv layer.
         Returns:
-            dX (ndarray): Gradient with respect to the input of the conv layer (X)
-            dW (ndarray): Gradient with respect to the weights of the conv layer (W)
-            db (ndarray): Gradient with respect to the biases of the conv layer (b)
-        """
+            dX (ndarray): The gradients with respect to the input of the conv layer (X).
+            dW (ndarray): The gradients with respect to the weights of the conv layer (W).
+            db (ndarray): The gradients with respect to the biases of the conv layer (b).
+        '''
         
         # The dimensions of X.
         n, in_C, in_H, in_W = self.X_dim
@@ -162,18 +188,25 @@ class Conv():
 
 
 class Pool():
-    ''' Description
+    '''Implement all functionality of a pooling layer.
     '''
     def __init__(self, X_dim, func, filter_dim, stride):
         self.X_dim = X_dim
+        if func != np.max:
+            raise NotImplemented('This pooling function is not implemented yet. Please use np.max.')
         self.func = func
         self.filter_dim = filter_dim
         self.stride = stride
         self.params = []
         
-    def forward(self, X):
-        """
-        """
+    def forward(self, X, **kwargs):
+        '''Implement the forward pass for a pooling layer.
+    
+        Args:
+            X (ndarray): Input of the pool layer.
+        Returns:
+            out (ndarray): Output of the pool layer.
+        '''
         self.X = X
         self.X_dim = X.shape
         
@@ -205,22 +238,19 @@ class Pool():
                         out[i,c,h,w] = self.func(x_slice)
         return out
         
-    def backward(self, dout):
-        """Implement the backward propagation for a pooling layer.
+    def backward(self, dout, **kwargs):
+        '''Implement the backward pass for a pooling layer.
     
         Args:
-            dout (ndarray): Gradient with respect to the output of the pool layer
+            dout (ndarray): The gradients with respect to the output of the pool layer.
         Returns:
-            dX (ndarray): Gradient with respect to the input of the pool layer (X)
-        """
+            dX (ndarray): The gradients with respect to the input of the pool layer (X)
+        '''
         # The dimensions of dout.
         n, C, out_H, out_W = dout.shape
           
         # Initialize dX with the correct shapes and zeros.
         dX = np.zeros(self.X_dim)
-        
-        #print(dout[0,0,0,0])
-        #print(X[0,0,0:3,0:3])
     
         for i in range(n):                              # Loop over the batch of training samples.
             for c in range(C):                          # Loop over channel indices of the output volume.
@@ -257,7 +287,7 @@ class Batchnorm():
 
 
 class Dropout():
-    ''' Description
+    '''Implement all functionality of a dropout layer.
     '''
     def __init__(self, prob=0.5):
         '''
@@ -265,19 +295,46 @@ class Dropout():
         self.prob = prob
         self.params = []
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
+        '''Implement the forward pass for a dropout layer.
+    
+        Args:
+            X (ndarray): Input of the dropout layer.
+        Returns:
+            out (ndarray): Output of the dropout layer.
+        '''
         self.X = X
+        out = X.copy()
         
-        # Create mask 
-        self.mask = np.random.rand(*self.X.shape) < self.prob
+        # Inputs are only deactivated during the training.
+        # While testing the full complexity of the model should be used.
+        if not kwargs['test']:
+            
+            # Create mask with same shape as X to deacitvate inputs. 
+            # Each value of the mask will be True with probability self.prob.
+            # Inverted dropout (e.g. scale by self.prob) is used. 
+            self.mask = (np.random.rand(*self.X.shape) < self.prob) / self.prob
         
-        # Apply mask
-        out = X * self.mask
-        
+            # Apply mask to deacitvate inputs.
+            # Afterwards each value of X will be zero with probability 1 - self.prob.
+            out *= self.mask
+       
         return out
 
-    def backward(self, dout):
-        dX = dout * self.mask * self.prob
+    def backward(self, dout, **kwargs):
+        '''Implement the backward pass for a dropout layer.
+    
+        Args:
+            dout (ndarray): The gradients with respect to the output of the dropout layer.
+        Returns:
+            dX (ndarray): The gradients with respect to the input of the dropout layer (X)
+        '''
+        dX = dout.copy()
+        
+        # Inputs are only deactivated during the training.
+        # While testing the full complexity of the model should be used.
+        if not kwargs['test']:
+            dX = dout * self.mask
         
         return dX, []
 

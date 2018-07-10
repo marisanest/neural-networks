@@ -9,7 +9,7 @@ class ReLU():
     def __init__(self):
         self.params = []
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
         ''' In the forward pass return the identity for x < 0
 
         Safe input for backprop and forward all values that are above 0.
@@ -35,7 +35,7 @@ class LeakyReLU():
     def __init__(self):
         self.params = []
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
         return None
 
     def backward(self, dout):
@@ -48,7 +48,7 @@ class sigmoid():
     def __init__(self):
         self.params = []
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
         self.X = X
         return 1. / (1 + np.exp(-self.X))
 
@@ -62,7 +62,7 @@ class tanh():
     def __init__(self):
         self.params = []
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
         self.X = X
         return np.tanh(self.X)
 

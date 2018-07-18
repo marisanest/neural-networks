@@ -31,7 +31,7 @@ class Flatten():
         return out, []
 
 class FullyConnected():
-    """Implement all functionality of a fully connected layer.
+    """ Implement all functionality of a fully connected layer.
     """
     def __init__(self, in_size, out_size):
         ''' Initilize all learning parameters in the layer
@@ -39,12 +39,12 @@ class FullyConnected():
         Weights will be initilized with modified Xavier initialization.
         Biases will be initilized with zero.
         '''
-        self.W = np.random.randn(in_size, out_size) * np.sqrt(2. / in_size) # Initializer.he_normal((in_size, out_size))
+        self.W = Initializer.he_normal((in_size, out_size)) # np.random.randn(in_size, out_size) * np.sqrt(2. / in_size) 
         self.b = np.zeros((1, out_size))
         self.params = [self.W, self.b]
 
     def forward(self, X, **kwargs):
-        '''Implement the forward pass for a fully connected layer.
+        ''' Implement the forward pass for a fully connected layer.
     
         Args:
             X (ndarray): Input of the fully connected layer.
@@ -56,7 +56,7 @@ class FullyConnected():
         return out
 
     def backward(self, dout, **kwargs):
-        '''Implement the backward propagation for a fully connected layer.
+        ''' Implement the backward pass for a fully connected layer.
     
         Args:
             dout (ndarray): The gradients with respect to the output of the fully connected layer.
@@ -71,7 +71,7 @@ class FullyConnected():
         return dX, [dW, db]
 
 class Conv():
-    '''Implement all functionality of a conv layer.
+    ''' Implement all functionality of a conv layer.
     '''
     def __init__(self, X_dim, filter_num, filter_dim, stride, padding):
         self.X_dim = X_dim
@@ -84,13 +84,13 @@ class Conv():
         else:
             raise TypeError('Calculated padding is not an integer. Please choose a different filter_dim and/or stride!')
         
-        fan_in, fan_out = self.get_fans(X_dim)
-        self.W = Initializer.glorot_normal((filter_num, X_dim[1], filter_dim, filter_dim)) # np.random.randn(filter_num, X_dim[1], filter_dim, filter_dim) * np.sqrt(2. / in_size)
+        self.W = Initializer.glorot_normal((filter_num, X_dim[1], filter_dim, filter_dim)) 
+        # np.random.randn(filter_num, X_dim[1], filter_dim, filter_dim) * np.sqrt(2. / in_size)
         self.b = np.zeros((filter_num, 1, 1, 1))
         self.params = [self.W, self.b]
 
     def forward(self, X, **kwargs):
-        '''Implement the forward pass for a conv layer.
+        ''' Implement the forward pass for a conv layer.
     
         Args:
             X (ndarray): Input of the conv layer.
@@ -132,7 +132,7 @@ class Conv():
         return out
 
     def backward(self, dout, **kwargs):
-        '''Implement the backward propagation for a convolution layer.
+        ''' Implement the backward pass for a convolution layer.
     
         Args:
             dout (ndarray): The gradients with respect to the output of the conv layer.
@@ -158,7 +158,7 @@ class Conv():
         db = np.zeros(self.b.shape)
 
 
-        # Calculate dX, dW and db
+        # Calculate dX, dW
         for i in range(n):                                # Loop over the batch of training samples.
             for c in range(out_C):                        # Loop over the channels of the output volume.
                 for h in range(out_H):                    # Loop over height indices of the output volume.
@@ -177,9 +177,10 @@ class Conv():
                         padded_dX[i,:,x_h_start:x_h_end,x_w_start:x_w_end] += dout[i, c, h, w] * self.W[c,:,:,:]
                         
                         dW[c,:,:,:] += dout[i, c, h, w] * padded_x_slice
-                
-                # Calculate db     
-                db[c] = np.sum(dout[:,c,:,:])
+        
+        # Calculate db
+        for c in range(out_C):                            # Loop over the channels of the output volume (e.g the filters).
+            db[c] = np.sum(dout[:,c,:,:])
        
         # Delete padding 
         dX = padded_dX[:,:,self.padding:-self.padding,self.padding:-self.padding]
@@ -188,7 +189,7 @@ class Conv():
 
 
 class Pool():
-    '''Implement all functionality of a pooling layer.
+    ''' Implement all functionality of a pooling layer.
     '''
     def __init__(self, X_dim, func, filter_dim, stride):
         self.X_dim = X_dim
@@ -200,7 +201,7 @@ class Pool():
         self.params = []
         
     def forward(self, X, **kwargs):
-        '''Implement the forward pass for a pooling layer.
+        ''' Implement the forward pass for a pooling layer.
     
         Args:
             X (ndarray): Input of the pool layer.
@@ -239,7 +240,7 @@ class Pool():
         return out
         
     def backward(self, dout, **kwargs):
-        '''Implement the backward pass for a pooling layer.
+        ''' Implement the backward pass for a pooling layer.
     
         Args:
             dout (ndarray): The gradients with respect to the output of the pool layer.
@@ -287,7 +288,7 @@ class Batchnorm():
 
 
 class Dropout():
-    '''Implement all functionality of a dropout layer.
+    ''' Implement all functionality of a dropout layer.
     '''
     def __init__(self, prob=0.5):
         '''
@@ -296,7 +297,7 @@ class Dropout():
         self.params = []
 
     def forward(self, X, **kwargs):
-        '''Implement the forward pass for a dropout layer.
+        ''' Implement the forward pass for a dropout layer.
     
         Args:
             X (ndarray): Input of the dropout layer.
@@ -322,7 +323,7 @@ class Dropout():
         return out
 
     def backward(self, dout, **kwargs):
-        '''Implement the backward pass for a dropout layer.
+        ''' Implement the backward pass for a dropout layer.
     
         Args:
             dout (ndarray): The gradients with respect to the output of the dropout layer.
@@ -334,7 +335,7 @@ class Dropout():
         # Inputs are only deactivated during the training.
         # While testing the full complexity of the model should be used.
         if not kwargs['test']:
-            dX = dout * self.mask
+            dX = dout * self.mask / self.prob
         
         return dX, []
 

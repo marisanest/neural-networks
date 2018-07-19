@@ -1,5 +1,5 @@
 import numpy as np
-from initializer import *
+from htw_nn_framework.initializer import *
 
 class Flatten():
     ''' Flatten layer used to reshape inputs into vector representation
@@ -334,7 +334,7 @@ class Dropout():
         
         # Inputs are only deactivated during the training.
         # While testing the full complexity of the model should be used.
-        if not kwargs['test']:
+        if not 'test' in kwargs:
             dX = dout * self.mask / self.prob
         
         return dX, []

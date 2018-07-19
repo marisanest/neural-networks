@@ -93,7 +93,7 @@ class Optimizer():
                 print("Loss = {0} :: Training = {1} :: Test = {2}".format(loss, train_acc, test_acc))
         return network
 
-        def adam(network, X_train, y_train, loss_function, batch_size=32, epoch=100, learning_rate=0.001, beta1=0.9, beta2=0.999, X_test=None, y_test=None, verbose=None):
+    def adam(network, X_train, y_train, loss_function, batch_size=32, epoch=100, learning_rate=0.001, beta1=0.9, beta2=0.999, X_test=None, y_test=None, verbose=None):
         '''  Optimize a given network with adam
         '''
         minibatches = Optimizer.get_minibatches(X_train, y_train, batch_size)

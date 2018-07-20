@@ -29,13 +29,13 @@ class NeuralNetwork:
             X = layer.forward(X, test=test)
         return X
 
-    def backward(self, dout):
+    def backward(self, dout, test=False):
         grads = []
         ''' Backprop through the network and keep a list of the gradients
             from each layer.
         '''
         for layer in reversed(self.layers):
-            dout, grad = layer.backward(dout)
+            dout, grad = layer.backward(dout, test=test)
             grads.append(grad)
         return grads
 

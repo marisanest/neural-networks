@@ -1,5 +1,5 @@
 import numpy as np
-from initializer import *
+from htw_nn_framework.initializer import *
 
 class Flatten():
     ''' Flatten layer used to reshape inputs into vector representation
@@ -33,14 +33,14 @@ class Flatten():
 class FullyConnected():
     """ Implement all functionality of a fully connected layer.
     """
-    def __init__(self, in_size, out_size):
+    def __init__(self, in_size, out_size, w_initializer=Initializer.he_normal, b_initializer=Initializer.zero):
         ''' Initilize all learning parameters in the layer
 
         Weights will be initilized with modified Xavier initialization.
         Biases will be initilized with zero.
         '''
-        self.W = Initializer.he_normal((in_size, out_size)) # np.random.randn(in_size, out_size) * np.sqrt(2. / in_size) 
-        self.b = np.zeros((1, out_size))
+        self.W = w_initializer((in_size, out_size))
+        self.b = b_initializer((1, out_size))
         self.params = [self.W, self.b]
 
     def forward(self, X, **kwargs):
@@ -73,20 +73,14 @@ class FullyConnected():
 class Conv():
     ''' Implement all functionality of a conv layer.
     '''
-    def __init__(self, X_dim, filter_num, filter_dim, stride, padding):
+    def __init__(self, X_dim, filter_num, filter_dim, stride, padding, w_initializer=Initializer.glorot_normal, b_initializer=Initializer.zero):
         self.X_dim = X_dim
         self.filter_num = filter_num
         self.filter_dim = filter_dim
         self.stride = stride
-        self.padding = ((X_dim[2] - 1) * stride - X_dim[2] + filter_dim) / 2 if padding else 0
-        if self.padding.is_integer():
-            self.padding = int(self.padding)
-        else:
-            raise TypeError('Calculated padding is not an integer. Please choose a different filter_dim and/or stride!')
-        
-        self.W = Initializer.glorot_normal((filter_num, X_dim[1], filter_dim, filter_dim)) 
-        # np.random.randn(filter_num, X_dim[1], filter_dim, filter_dim) * np.sqrt(2. / in_size)
-        self.b = np.zeros((filter_num, 1, 1, 1))
+        self.padding = self.calculate_padding(X_dim, filter_dim, stride) if padding else 0
+        self.W = w_initializer((filter_num, X_dim[1], filter_dim, filter_dim)) 
+        self.b = b_initializer((filter_num, 1, 1, 1))
         self.params = [self.W, self.b]
 
     def forward(self, X, **kwargs):
@@ -186,6 +180,30 @@ class Conv():
         dX = padded_dX[:,:,self.padding:-self.padding,self.padding:-self.padding]
     
         return dX, [dW, db]
+    
+    @staticmethod
+    def calculate_padding(X_dim, filter_dim, stride):
+        ''' Calcluate padding.
+    
+        Args:
+            X_dim: Dimension of X.
+            filter_dim: Dimension of filter.
+            stride: stride.
+        Returns:
+            padding: Padding as integer.
+        Raise:
+            TypeError: If calculated padding is not an interger, an TypeError is raised.
+        '''
+        # Calculate padding
+        padding = ((X_dim[2] - 1) * stride - X_dim[2] + filter_dim) / 2
+        
+        # Check if padding is an interger
+        if padding.is_integer():
+            # Retrun padding as interger
+            return int(padding)
+        else:
+            # Raise TypeError if padding is not an interger
+            raise TypeError('Calculated padding is not an integer. Please choose a different filter_dim and/or stride!')
 
 
 class Pool():
@@ -280,10 +298,10 @@ class Batchnorm():
     def __init__(self, X_dim):
         None
 
-    def forward(self, X):
+    def forward(self, X, **kwargs):
         return None
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
         return None
 
 

@@ -45,8 +45,14 @@ class Optimizer():
         '''  Optimize a given network with stochastic gradient descent with momentum
         '''
         minibatches = Optimizer.get_minibatches(X_train, y_train, batch_size)
+        
         # set initial momentum 
-        v = np.zeros(grads.shape)
+        vs = []
+        for i in range(len(network.params)):
+            vs.append([])
+            for j in range(len(network.params[i])):
+                vs[i].append(np.zeros(network.params[i][j].shape))         
+                
         for i in range(epoch):
             loss = 0
             if verbose:
@@ -57,10 +63,10 @@ class Optimizer():
                 # calculate gradients via backpropagation
                 grads = network.backward(dout)
                 # run sgd with momentum update for all learnable parameters in self.params
-                for param, grad in zip(network.params, reversed(grads)):
+                for param, grad, v in zip(network.params, reversed(grads), vs):
                     for i in range(len(grad)):
-                        v = mu * v - learning_rate * grad[i]
-                        param[i] += v
+                        v[i] = mu * v[i] - learning_rate * grad[i]
+                        param[i] += v[i]
             if verbose:
                 train_acc = np.mean(y_train == network.predict(X_train))
                 test_acc = np.mean(y_test == network.predict(X_test))
@@ -71,8 +77,14 @@ class Optimizer():
         '''  Optimize a given network with RMSProp
         '''
         minibatches = Optimizer.get_minibatches(X_train, y_train, batch_size)
+        
         # set initial grad cache 
-        grad_cache = np.zeros(grads.shape)
+        grads_cache = []
+        for i in range(len(network.params)):
+            grads_cache.append([])
+            for j in range(len(network.params[i])):
+                grads_cache[i].append(np.zeros(network.params[i][j].shape))
+                
         for i in range(epoch):
             loss = 0
             if verbose:
@@ -83,22 +95,30 @@ class Optimizer():
                 # calculate gradients via backpropagation
                 grads = network.backward(dout)
                 # run RMSProp update for all learnable parameters in self.params
-                for param, grad in zip(network.params, reversed(grads)):
+                for param, grad, grad_cache in zip(network.params, reversed(grads), grads_cache):
                     for i in range(len(grad)):
-                        grad_cache = deacay * grad_cache + (1 - decay) * grads * grads
-                        param[i] += -learning_rate * grads / (np.sqrt(grad_cache) + 1e-7)
+                        grad_cache[i] = decay * grad_cache[i] + (1 - decay) * grad[i] * grad[i]
+                        param[i] += -learning_rate * grad[i] / (np.sqrt(grad_cache[i]) + 1e-7)
             if verbose:
                 train_acc = np.mean(y_train == network.predict(X_train))
                 test_acc = np.mean(y_test == network.predict(X_test))
                 print("Loss = {0} :: Training = {1} :: Test = {2}".format(loss, train_acc, test_acc))
         return network
 
-        def adam(network, X_train, y_train, loss_function, batch_size=32, epoch=100, learning_rate=0.001, beta1=0.9, beta2=0.999, X_test=None, y_test=None, verbose=None):
+    def adam(network, X_train, y_train, loss_function, batch_size=32, epoch=100, learning_rate=0.001, beta1=0.9, beta2=0.999, X_test=None, y_test=None, verbose=None):
         '''  Optimize a given network with adam
         '''
         minibatches = Optimizer.get_minibatches(X_train, y_train, batch_size)
+        
         # set initial m and v
-        m, v = np.zeros(grads.shape)
+        ms, vs  = [], []
+        for i in range(len(network.params)):
+            ms.append([])
+            vs.append([])
+            for j in range(len(network.params[i])):
+                ms[i].append(np.zeros(network.params[i][j].shape))
+                vs[i].append(np.zeros(network.params[i][j].shape))
+                
         for i_e in range(epoch):
             loss = 0
             if verbose:
@@ -109,12 +129,12 @@ class Optimizer():
                 # calculate gradients via backpropagation
                 grads = network.backward(dout)
                 # run adam update for all learnable parameters in self.params
-                for param, grad in zip(network.params, reversed(grads)):
+                for param, grad, m, v in zip(network.params, reversed(grads), ms, vs):
                     for i in range(len(grad)):
-                        m = beta1 * m + (1 - beta1) * dx
-                        v = beta2 * v + (1 - beta2) * dx * dx
-                        m_unbias = m / (1 - beta1 ** i_e)
-                        v_unbias = v / (1 - beta2 ** i_e)
+                        m[i] = beta1 * m[i] + (1 - beta1) * grad[i]
+                        v[i] = beta2 * v[i] + (1 - beta2) * grad[i] * grad[i]
+                        m_unbias = m[i] / (1 - beta1 ** i_e)
+                        v_unbias = v[i] / (1 - beta2 ** i_e)
                         param[i] += -learning_rate * m_unbias / (np.sqrt(v_unbias) + 1e-7)
             if verbose:
                 train_acc = np.mean(y_train == network.predict(X_train))

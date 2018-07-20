@@ -17,7 +17,7 @@ class ReLU():
         self.X = X
         return np.maximum(X, 0)
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
         ''' Derivative of ReLU
 
         Retruns:
@@ -46,7 +46,7 @@ class LeakyReLU():
         self.X = X
         return np.maximum(.01 * X, X)
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
         ''' Implement the backward pass for the Leaky ReLU activation function.
 
         Retruns:
@@ -54,7 +54,7 @@ class LeakyReLU():
             []: No gradients for the weights and biases on Leaky ReLU operation.
         '''
         dX = dout.copy()
-        dX[self.X <= 0] = .01 * dout
+        dX[self.X <= 0] *= .01
         return dX, []
 
 class sigmoid():
@@ -74,7 +74,7 @@ class sigmoid():
         self.X = X
         return 1. / (1 + np.exp(-self.X))
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
         ''' Implement the backward pass for the sigmoid activation function.
 
         Retruns:
@@ -91,8 +91,8 @@ class sigmoid():
         # df/dg = df/df * - 1/g^2
         # df/dh = df/dg * 1
         # df/dx = df/dh * e^-x 
-        #       = - 1/g^2 * e^-x  
-        #       = - 1/(1 + e^-x)^2 * e^-x
+        #       = dout * - 1/g^2 * 1 * e^-x  
+        #       = dout * - 1/(1 + e^-x)^2 * e^-x
         
         dX = dout * -(1. / np.square(1 + np.exp(-self.X))) * np.exp(-self.X)
         return dX, []
@@ -114,7 +114,7 @@ class tanh():
         self.X = X
         return np.tanh(self.X)
 
-    def backward(self, dout):
+    def backward(self, dout, **kwargs):
         ''' Implement the backward pass for the tanh activation function.
 
         Retruns:
@@ -136,8 +136,8 @@ class tanh():
         # df/dj = df/di * e^j
         # df/dx = df/dj * 2
         #       = dout * -1 * - 2/h^2 * 1 * e^j * 2
-        #       = (dout * 4 * e^2x) / (1 + e^2x)^2
+        #       = dout * e^2x * 4 / (1 + e^2x)^2
         
-        dX = (dout * 4 * np.exp(2 * self.X)) / np.square(1 + np.exp(2 * self.X))
+        dX = dout * np.exp(2 * self.X) * 4 / np.square(1 + np.exp(2 * self.X))
         return dX, []
 
